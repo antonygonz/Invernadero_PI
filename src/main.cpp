@@ -10,6 +10,8 @@ void Mensaje();
 //Variables de Funcion Mensasje
 char nombre=1;
 char valor=1;
+String comun="";
+int cont=0;
 
 void setup()
 {
@@ -30,6 +32,7 @@ void loop()
 void Mensaje()
 {
 nombre = (char)Serial.read();
+
   if (nombre!=valor)
   {
     if (nombre==-1)
@@ -38,7 +41,17 @@ nombre = (char)Serial.read();
     }
     else{
     Serial.print(nombre);
+    comun = comun + nombre;
+    cont++;
     }
+    
+  }
+  if (cont==5)
+  {
+    Serial.print("\n");
+    Serial.println(comun);
+    cont=0;
+    comun="";
   }
   
   valor=nombre;
