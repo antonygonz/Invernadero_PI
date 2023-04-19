@@ -1,4 +1,7 @@
 #include <Arduino.h>
+#include <string.h>
+#include <Wire.h>
+#include <EEPROM.h>
 
 //establecer la comunicacion 
 char nombre=1;
