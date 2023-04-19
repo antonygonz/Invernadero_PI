@@ -1,9 +1,34 @@
 #include <Arduino.h>
 
-void setup() {
+//establecer la comunicacion 
+char nombre=1;
+char valor=1;
+
+void setup()
+{
   // put your setup code here, to run once:
+  Serial.begin(9600);
+  //Serial3.begin(115200);
+  pinMode(13,OUTPUT);
+  delay(500);
+  Serial.println("Hola mundo ");
 }
 
-void loop() {
-  // put your main code here, to run repeatedly:
+void loop() 
+{
+  nombre = (char)Serial.read();
+  if (nombre!=valor)
+  {
+    if (nombre==-1)
+    {
+      /* code */
+    }
+    else{
+    Serial.print(nombre);
+    }
+  }
+  
+  valor=nombre;
+  //delay(500);
+
 }
