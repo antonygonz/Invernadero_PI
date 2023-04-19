@@ -3,7 +3,11 @@
 #include <Wire.h>
 #include <EEPROM.h>
 
-//establecer la comunicacion 
+//Definicion de funciones
+void Mensaje();
+
+
+//Variables de Funcion Mensasje
 char nombre=1;
 char valor=1;
 
@@ -19,7 +23,13 @@ void setup()
 
 void loop() 
 {
-  nombre = (char)Serial.read();
+  Mensaje();
+
+}
+
+void Mensaje()
+{
+nombre = (char)Serial.read();
   if (nombre!=valor)
   {
     if (nombre==-1)
@@ -34,4 +44,5 @@ void loop()
   valor=nombre;
   //delay(500);
 
+  return;
 }
