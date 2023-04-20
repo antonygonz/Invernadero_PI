@@ -22,7 +22,7 @@ char carriagereturn=13;//carriage return for windows
 String startup="start";
 String stopun="stop";
 String nohacenada="1";
-
+String modganancia="modgan";
 
 
 void setup()
@@ -31,6 +31,7 @@ void setup()
   startup.concat(carriagereturn);
   stopun.concat(carriagereturn);
   nohacenada.concat(carriagereturn);
+  modganancia.concat(carriagereturn);
   //aqui termina
 
   Serial.begin(9600);//se establece la velocidad de comunicacion usb
@@ -46,7 +47,8 @@ void loop()
   {
     shellcomando = Mensaje();
   }
-  shellcomando=shell(shellcomando);
+  shellcomando=shell(shellcomando);//adquiere el comando y resetea el comando para una unica ejecuccion
+
   
 }
 
@@ -83,24 +85,26 @@ datoLeido = (char)Serial.read();
 }
 String shell(String debugcomand)
 {
-  
+  //delay(500);
   if (debugcomand.equals(nohacenada))
   {
-    delay(500);
     Serial.println("No hace nada");
     debugcomand="";
   }
   else if (debugcomand.equals(startup))
   {
-    delay(500);
     Serial.println("Comenzando");
     debugcomand="";
   }else if (debugcomand.equals(stopun))
   {
-    delay(500);
     Serial.println("finalizando");
     debugcomand="";
+  }else if (debugcomand.equals(modganancia))
+  {
+    Serial.println("cambio de ganancias");
+    debugcomand="";
   }
+  
   return debugcomand; 
   
   /*else
@@ -124,7 +128,5 @@ String shell(String debugcomand)
       Serial.print("\n");
     }
   }
-  */
-   
-  
+  */ 
 }
