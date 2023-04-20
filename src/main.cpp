@@ -2,6 +2,8 @@
 #include <string.h>
 #include <Wire.h>
 #include <EEPROM.h>
+#include <SPI.h>
+#include <Adafruit_BMP280.h>
 
 //Definicion de funciones
 String Mensaje();//lee comando
@@ -9,6 +11,7 @@ String shell(String);//interpreta el comando para iniciar otras funciones
 void start();//enciende la maquina
 void stop();//detiene la maquina
 void modgan();//cambia las ganancias 
+void temp280();
 
 //Variables de Funcion Mensasje
 char datoLeido=1;//dato leido al momento
@@ -23,7 +26,12 @@ String startup="start";
 String stopun="stop";
 String nohacenada="1";
 String modganancia="modgan";
-
+String readtemperatura="readtemp";
+//configuraciones del sensor de temperatura bmp280
+Adafruit_BMP280 bmp; // use I2C interface
+Adafruit_Sensor *bmp_temp = bmp.getTemperatureSensor();//funcion del objeto bmp(tipo:Adafruit_BMP280)para leer temperatura
+Adafruit_Sensor *bmp_pressure = bmp.getPressureSensor();//funcion del objeto bmp(tipo:Adafruit_BMP280)para leer presion
+bool SensorDig=true;//verdadero para bmp280, falso para ads1115
 
 void setup()
 {
@@ -32,6 +40,7 @@ void setup()
   stopun.concat(carriagereturn);
   nohacenada.concat(carriagereturn);
   modganancia.concat(carriagereturn);
+  readtemperatura.concat(carriagereturn);
   //aqui termina
 
   Serial.begin(9600);//se establece la velocidad de comunicacion usb
@@ -39,6 +48,36 @@ void setup()
   pinMode(13,OUTPUT);
   delay(500);
   Serial.println("Hola mundo ");
+  //apartado del sensor bmp280
+  if (SensorDig)
+  {
+    //configuraciones del sensor bmp280
+    Serial.println(F("BMP280 Sensor event test"));
+    unsigned status;
+    status = bmp.begin(BMP280_ADDRESS_ALT, BMP280_CHIPID);
+    if (!status)//si no encuentra el sensor en el puerto i2c
+    {
+      Serial.println(F("Could not find a valid BMP280 sensor, check wiring or "
+                        "try a different address!"));
+      Serial.print("SensorID was: 0x"); Serial.println(bmp.sensorID(),16);
+      Serial.print("        ID of 0xFF probably means a bad address, a BMP 180 or BMP 085\n");
+      Serial.print("   ID of 0x56-0x58 represents a BMP 280,\n");
+      Serial.print("        ID of 0x60 represents a BME 280.\n");
+      Serial.print("        ID of 0x61 represents a BME 680.\n");
+      while (1) delay(10);
+      /* Default settings from datasheet. */
+      bmp.setSampling(Adafruit_BMP280::MODE_NORMAL,     /* Operating Mode. */
+                      Adafruit_BMP280::SAMPLING_X2,     /* Temp. oversampling */
+                      Adafruit_BMP280::SAMPLING_X16,    /* Pressure oversampling */
+                      Adafruit_BMP280::FILTER_X16,      /* Filtering. */
+                      Adafruit_BMP280::STANDBY_MS_500); /* Standby time. */
+
+      bmp_temp->printSensorDetails();
+    }
+  }
+  //fin del apartado del sensor 
+
+
 }
 
 void loop() 
@@ -48,7 +87,8 @@ void loop()
     shellcomando = Mensaje();
   }
   shellcomando=shell(shellcomando);//adquiere el comando y resetea el comando para una unica ejecuccion
-
+  
+  
   
 }
 
@@ -103,7 +143,15 @@ String shell(String debugcomand)
   {
     Serial.println("cambio de ganancias");
     debugcomand="";
+  }else if (debugcomand.equals(readtemperatura))
+  {
+    if (SensorDig)//verdadero para sensor bmp280
+    {
+      temp280();
+    }else{}//falso para sensor ads1115 codigo en desarrollo}
+    debugcomand="";
   }
+  
   
   return debugcomand; 
   
@@ -129,4 +177,22 @@ String shell(String debugcomand)
     }
   }
   */ 
+}
+void temp280()
+{
+sensors_event_t temp_event, pressure_event;
+  bmp_temp->getEvent(&temp_event);
+  bmp_pressure->getEvent(&pressure_event);
+  
+  Serial.print(F("Temperature = "));
+  Serial.print(temp_event.temperature);
+  Serial.println(" *C");
+
+  Serial.print(F("Pressure = "));
+  Serial.print(pressure_event.pressure);
+  Serial.println(" hPa");
+
+  Serial.println();
+  //delay(2000);  
+
 }
