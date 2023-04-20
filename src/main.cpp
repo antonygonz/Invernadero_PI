@@ -4,8 +4,8 @@
 #include <EEPROM.h>
 
 //Definicion de funciones
-void Mensaje();//lee comando
-void shell();//interpreta el comando para iniciar otras funciones
+String Mensaje();//lee comando
+String shell(String);//interpreta el comando para iniciar otras funciones
 void start();//enciende la maquina
 void stop();//detiene la maquina
 void modgan();//cambia las ganancias 
@@ -15,11 +15,24 @@ char datoLeido=1;//dato leido al momento
 char ultimoDato=1;//dato anterior
 String comando="";//Comando actual
 String comandoAnterior="";//Comando Anterior
+String shellcomando="";
 int cont=0;
+//Variables de shell
+char carriagereturn=13;//carriage return for windows 
+String startup="start";
+String stopun="stop";
+String nohacenada="1";
+
+
 
 void setup()
 {
-  // put your setup code here, to run once:
+  //se agrega el caracter CR a las variables de shell
+  startup.concat(carriagereturn);
+  stopun.concat(carriagereturn);
+  nohacenada.concat(carriagereturn);
+  //aqui termina
+
   Serial.begin(9600);//se establece la velocidad de comunicacion usb
   //Serial3.begin(115200);//se establece la velocidad de comunicacion wifi con el esp8266
   pinMode(13,OUTPUT);
@@ -31,13 +44,13 @@ void loop()
 {
   if (Serial.available())//revisa que esten entrando datos para obtener el mensaje
   {
-    Mensaje();
+    shellcomando = Mensaje();
   }
+  shellcomando=shell(shellcomando);
   
-  shell();
 }
 
-void Mensaje()
+String Mensaje()
 {
 datoLeido = (char)Serial.read();
   if (datoLeido!=ultimoDato)//verifica que la ultima lectura no sea el mismo dato
@@ -56,18 +69,62 @@ datoLeido = (char)Serial.read();
   {
     //Serial.print("\n");//agrega un salto de linea para diferenciar de la linea anterior
     //Sigiente apartado para pruebas
-    Serial.println("Comando actual es:"+comando);
-    Serial.println("Comando anterior es:"+comandoAnterior);
+    //Serial.println("Comando actual es:"+comando);
+    //Serial.println("Comando anterior es:"+comandoAnterior);
     //Serial.println(comando);//manda el string completo que se almaceno
     //cont=0; //contador para obtener strings de misma longitud
     comandoAnterior=comando;//copia el comando actual al anterior
-    comando="";//resetea la variable del string comando
+    comando="";//resetea la variable del string
+    Serial.println("comando: "+comandoAnterior); 
+    return comandoAnterior;
   }
   ultimoDato=datoLeido;//iguala los datos para la comparacion del siguiente ciclo
-  //creo que quitar la ultima linea generara mas errores asi que la voy a dejar
-  return;
+  return"";
 }
-void shell()
+String shell(String debugcomand)
 {
-  //Serial.println("no hace nada");
+  
+  if (debugcomand.equals(nohacenada))
+  {
+    delay(500);
+    Serial.println("No hace nada");
+    debugcomand="";
+  }
+  else if (debugcomand.equals(startup))
+  {
+    delay(500);
+    Serial.println("Comenzando");
+    debugcomand="";
+  }else if (debugcomand.equals(stopun))
+  {
+    delay(500);
+    Serial.println("finalizando");
+    debugcomand="";
+  }
+  return debugcomand; 
+  
+  /*else
+  {//apartado de pruebas para visualizar strings
+    delay(500);
+    Serial.println("debugcomand");
+    for (size_t i = 0; i < debugcomand.length(); i++)
+    {
+      
+      Serial.print((String)i+" letra= ");
+      Serial.print((int)debugcomand[i]);
+      Serial.print("\n");
+    }
+    delay(500);
+    Serial.println("start");
+    for (size_t i = 0; i < startup.length(); i++)
+    {
+      
+      Serial.print((String)i+" letra= ");
+      Serial.print((int)startup[i]);
+      Serial.print("\n");
+    }
+  }
+  */
+   
+  
 }
