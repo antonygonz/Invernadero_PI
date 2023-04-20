@@ -24,9 +24,11 @@ int cont=0;
 char carriagereturn=13;//carriage return for windows 
 String startup="start";
 String stopun="stop";
+bool working=false;//checa si el sitema esta trabajando
 String nohacenada="1";
 String modganancia="modgan";
 String readtemperatura="readtemp";
+String coling="cool";
 //configuraciones del sensor de temperatura bmp280
 Adafruit_BMP280 bmp; // use I2C interface
 Adafruit_Sensor *bmp_temp = bmp.getTemperatureSensor();//funcion del objeto bmp(tipo:Adafruit_BMP280)para leer temperatura
@@ -41,6 +43,7 @@ void setup()
   nohacenada.concat(carriagereturn);
   modganancia.concat(carriagereturn);
   readtemperatura.concat(carriagereturn);
+  coling.concat(carriagereturn);
   //aqui termina
 
   Serial.begin(9600);//se establece la velocidad de comunicacion usb
@@ -95,8 +98,8 @@ void loop()
 String Mensaje()
 {
 datoLeido = (char)Serial.read();
-  if (datoLeido!=ultimoDato)//verifica que la ultima lectura no sea el mismo dato
-  {//aunque realmente verifica q
+  //if (datoLeido!=ultimoDato)//verifica que la ultima lectura no sea el mismo dato//actualmente desactivado
+  //{//aunque realmente verifica q
     if (datoLeido!=-1)//verifica que el dato no sea levantamiento de tecla puede ocasionar error a futuro
     {
       Serial.print(datoLeido);//muestra el ultimo dato en entrar
@@ -106,7 +109,7 @@ datoLeido = (char)Serial.read();
       }
       //cont++;//suma datos al contador actualmente reemplazado por el enter
     }
-  }
+  //}
   if (datoLeido==10)//verifica que el dato leido sea enter para terminar la comunicacion 
   {
     //Serial.print("\n");//agrega un salto de linea para diferenciar de la linea anterior
@@ -133,10 +136,12 @@ String shell(String debugcomand)
   }
   else if (debugcomand.equals(startup))
   {
+    working=true;
     Serial.println("Comenzando");
     debugcomand="";
   }else if (debugcomand.equals(stopun))
   {
+    working=false;
     Serial.println("finalizando");
     debugcomand="";
   }else if (debugcomand.equals(modganancia))
@@ -150,7 +155,20 @@ String shell(String debugcomand)
       temp280();
     }else{}//falso para sensor ads1115 codigo en desarrollo}
     debugcomand="";
+  }else if (debugcomand.equals(coling))
+  {
+    if (!working)
+    {
+      Serial.println("Enfriando");
+      //codigo para enfriar en el futuro
+    }else
+    {
+      Serial.println("Espere a que se apage el sistema");
+    }
+    debugcomand="";
+    
   }
+  
   
   
   return debugcomand; 
